@@ -197,3 +197,110 @@ as
 			end
 	end 
 GO
+/*ACTIVIDAD 1*/
+SELECT [NombreMedico], [ApellidoMedico],[FechaIngreso]
+FROM [hospi].[MEDICOS]
+WHERE [Especialidad] like 'Pediatria'
+
+/*ACTIVIDAD 2*/
+select [Nombre]
+from[hospi].[Pacientes]
+where [Poblacion]='Madrid'
+
+/*ACTIVIDAD 3*/
+select [NombreMedico]from [hospi].[MEDICOS] as h
+inner join [hospi].[INGRESOS] as i on h.CodIdentificacion= i.CodigoIdentificacion
+where i.FechaIngreso> '01-01-2010' and  i.FechaIngreso > '01-02-2010'
+
+/*ACTIVIDAD 4*/
+select p.Nombre,p.Apellidos from [hospi].[Pacientes] as p
+inner join [hospi].[INGRESOS] as i on p.NHistorial= i.NHistorial
+where i.FechaIngreso> '01-01-2009' and  i.FechaIngreso > '01-05-2009' and i.Alergico ='si'
+
+/*ACTIVIDAD 5*/
+
+select p.Nombre from [hospi].[MEDICOS] as m
+inner join [hospi].[INGRESOS] as i on m.CodIdentificacion= i.CodigoIdentificacion
+inner join [hospi].[Pacientes] as p on p.NHistorial =i.NHistorial
+where m.NombreMedico ='Antonio' and m.ApellidoMedico= 'Jaen Hernandez'
+
+
+
+/*PROCEDIMIENTOS ALMACENADOS */
+
+						/*PROCEDIMIENTO ALMACENADO 1 */
+create procedure hospi.Altamedico
+
+@p_CodIdentificacion varchar(4),
+@p_NombreMedico varchar(15),
+@p_ApellidoMedico varchar(50),
+@p_Especialidad varchar(25),
+@p_FechaIngreso date,
+@p_Cargo varchar(25),
+@p_NColegiado int,
+@p_Observaciones varchar(6000),
+@p_error int
+as
+	begin
+	--Comprobacion de numero de colegiado
+			if @p_NColegiado >1000
+			begin
+				set @p_error = 1 --si el numero de colegiado es muy viejo no se admite y sale en la pantalla error 1--
+			end
+	end 
+
+					/*PROCEDIMIENTO ALMACENADO 2 */
+
+create procedure usp_MostrarPacientesIngresados
+@p_fecha1 date,
+@p_fecha2 date
+as
+
+begin
+
+		select p.NSegSocial,p.Nombre,p.Apellidos,p.Domicilio,p.Poblacion,p.Provincia,p.CodPostal,p.Telefono,p.NHistorial,p.Sexo
+		from [hospi].[Pacientes] as p
+		inner join [hospi].[INGRESOS] as i on p.NHistorial= i.NHistorial
+		where i.FechaIngreso> @p_fecha1 and  i.FechaIngreso > @p_fecha2 
+end
+
+
+
+
+/*FUNCIONES*/
+
+		
+		/*FUNCION 1*/
+create FUNCTION hospi.ContarGenero( @gen varchar )
+
+RETURNS int
+AS
+BEGIN
+         DECLARE @x int
+
+         SELECT @x = count(sexo)
+         FROM [hospi].[Pacientes]
+         WHERE sexo = @gen
+
+        RETURN @x
+END
+
+
+SELECT hospi.ContarGenero ('H')
+SELECT hospi.ContarGenero ('M')
+	
+				/*FUNCION 2*/
+
+CREATE FUNCTION HOSPI.ContarPacientes ()
+RETURNS int
+AS
+BEGIN
+ 
+   DECLARE @NI int  --Numero Ingresos
+
+         SELECT @NI = count([NHistorial])
+         FROM [hospi].[Pacientes]
+       
+
+        RETURN @NI
+END
